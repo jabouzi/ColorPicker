@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -14,14 +15,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.center
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.skanderjabouzi.colorpicker.ui.theme.ColorPickerTheme
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,13 +59,13 @@ fun ColorPickerDemo(
     colorPickerheight: Dp = 500.dp,
     magnifierWidth: Dp = 60.dp,
     magnifierHeight: Dp = 100.dp,
-    selectionCircleDiameter: Dp = 30.dp,
 ) {
     data class ButtonColor(var brightness: Color, val colorPicker: Color, val temperature: Color)
     data class SlotVisible(var brightness: Boolean, val colorPicker: Boolean, val temperature: Boolean)
     val buttonColor = ButtonColor(Color.Transparent, Color.Transparent, Color.Transparent)
     val slotVisible = SlotVisible(false, false, false)
     var selectedColor by remember { mutableStateOf(Color(0xFF83eb34)) }
+    var positionOffset by remember { mutableStateOf(Offset(colorPickerwidth.value / 2, colorPickerheight.value / 2)) }
     var buttonColorState by remember { mutableStateOf(buttonColor) }
     var slotVisibleState by remember { mutableStateOf(slotVisible) }
 
@@ -97,8 +102,8 @@ fun ColorPickerDemo(
                         colorPickerHeight = 800.dp,
                         magnifierWidth = 60.dp,
                         magnifierHeight = 100.dp,
-                        selectionCircleDiameter = 30.dp,
-                        onColorChange = { selectedColor = it }
+                        onColorChange = { selectedColor = it },
+                        onPositionChange = { positionOffset = it }
                     )
                 }
             }
@@ -208,13 +213,50 @@ fun GradientButton(
     }
 }
 
+
+fun GradientBrush(
+    size: Float,
+    colorsList: List<Color>
+): Brush {
+    return Brush.sweepGradient(
+        colors = colorsList,
+        center = Offset(x = size / 2, y = size / 2)
+    )
+}
+
+val largeRadialGradient = object : ShaderBrush() {
+    override fun createShader(size: Size): Shader {
+        val biggerDimension = maxOf(size.height, size.width)
+        return RadialGradientShader(
+            colors = listOf(
+                Color.Red,
+                Color.Magenta,
+                Color.Blue,
+                Color.Cyan,
+                Color.Green,
+                Color.Yellow,
+                Color.Red
+            ),
+            center = size.center,
+            radius = biggerDimension / 2f,
+            colorStops = listOf(0f, 0.95f)
+        )
+    }
+}
+
 @Preview
 @Composable
 fun GradientButtonPreview() {
-    val brush = Brush.verticalGradient(
-        colors = listOf(
+    val brush = GradientBrush(
+        size = 50F,
+        colorsList = listOf(
+            Color.Red,
+            Color.Magenta,
             Color.Blue,
-            Color.Green
+            Color.Cyan,
+            Color.Green,
+            Color.Yellow,
+            Color.Red
         )
     )
     GradientButton(
@@ -223,7 +265,7 @@ fun GradientButtonPreview() {
         size = 50.dp,
         borderColor = Color.Red,
         borderWidth = 1.dp,
-        gradient = brush,
+        gradient = largeRadialGradient,
         onClick = {}
     )
 }
@@ -233,5 +275,30 @@ fun GradientButtonPreview() {
 fun DefaultPreview2() {
     ColorPickerTheme {
         ColorPickerDemo2()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DraggableTextLowLevel() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        var offsetX by remember { mutableStateOf(0f) }
+        var offsetY by remember { mutableStateOf(0f) }
+
+        println("offsetX: $offsetX, offsetY: $offsetY")
+
+        Box(
+            Modifier
+                .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+                .background(Color.Blue)
+                .size(50.dp)
+                .pointerInput(Unit) {
+                    detectDragGestures { change, dragAmount ->
+                        change.consume()
+                        offsetX += dragAmount.x
+                        offsetY += dragAmount.y
+                    }
+                }
+        )
     }
 }
