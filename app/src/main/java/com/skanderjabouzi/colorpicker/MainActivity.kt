@@ -56,7 +56,7 @@ fun ColorPickerDemo(
     data class SlotVisible(var brightness: Boolean, val colorPicker: Boolean, val temperature: Boolean)
     val buttonsColors = ButtonsColors(Color.Transparent, Color.Transparent, Color.Transparent)
     val slotVisible = SlotVisible(false, false, false)
-    var surfaceColor by remember { mutableStateOf(Color(0xFF83eb34)) }
+    var selectedColor by remember { mutableStateOf(Color(0xFF83eb34)) }
     var buttonsColorsState by remember { mutableStateOf(buttonsColors) }
     var slotVisibleState by remember { mutableStateOf(slotVisible) }
 
@@ -72,7 +72,9 @@ fun ColorPickerDemo(
 
             BulbSlot {
                 if (slotVisibleState.brightness) {
-                    Slider()
+                    Slider(
+                        gradientColorBottom = selectedColor,
+                    )
                 }
             }
 
@@ -84,7 +86,7 @@ fun ColorPickerDemo(
                         magnifierWidth = 60.dp,
                         magnifierHeight = 100.dp,
                         selectionCircleDiameter = 30.dp,
-                        onColorChange = { surfaceColor = it }
+                        onColorChange = { selectedColor = it }
                     )
                 }
             }
@@ -92,7 +94,7 @@ fun ColorPickerDemo(
             BulbSlot {
                 if (slotVisibleState.temperature) {
                     Slider(
-                        gradientColorBottom = Color.White,
+                        gradientColorBottom = selectedColor,
                         gradientColorTop = Color(0xFF9C27B0),
                         range = 0..25
                     )
@@ -149,7 +151,7 @@ fun ColorPickerDemo(
                         slotVisibleState = slotVisible.copy(temperature = true)
                         buttonsColorsState = buttonsColors.copy(temperature = Color.Red)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = surfaceColor),
+                    colors = ButtonDefaults.buttonColors(containerColor = selectedColor),
                     modifier = Modifier
                         .size(50.dp)
                         .border(1.dp, buttonsColorsState.temperature, shape = CircleShape)
