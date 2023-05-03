@@ -52,15 +52,15 @@ fun ColorPickerDemo(
     magnifierHeight: Dp = 100.dp,
     selectionCircleDiameter: Dp = 30.dp,
 ) {
-    data class ButtonsColors(var brightness: Color, val colorPicker: Color, val temperature: Color)
+    data class ButtonColor(var brightness: Color, val colorPicker: Color, val temperature: Color)
     data class SlotVisible(var brightness: Boolean, val colorPicker: Boolean, val temperature: Boolean)
-    val buttonsColors = ButtonsColors(Color.Transparent, Color.Transparent, Color.Transparent)
+    val buttonColor = ButtonColor(Color.Transparent, Color.Transparent, Color.Transparent)
     val slotVisible = SlotVisible(false, false, false)
     var selectedColor by remember { mutableStateOf(Color(0xFF83eb34)) }
-    var buttonsColorsState by remember { mutableStateOf(buttonsColors) }
+    var buttonColorState by remember { mutableStateOf(buttonColor) }
     var slotVisibleState by remember { mutableStateOf(slotVisible) }
 
-    buttonsColorsState = buttonsColors.copy(colorPicker = Color.Red)
+    buttonColorState = buttonColor.copy(colorPicker = Color.Red)
     slotVisibleState = slotVisible.copy(colorPicker = true)
 
     ColorPickerTheme {
@@ -108,11 +108,11 @@ fun ColorPickerDemo(
                 IconButton(
                     onClick = {
                         slotVisibleState = slotVisible.copy(brightness = true)
-                        buttonsColorsState = buttonsColors.copy(brightness = Color.Red)
+                        buttonColorState = buttonColor.copy(brightness = Color.Red)
                     },
                     modifier = Modifier
                         .size(50.dp)
-                        .border(1.dp, buttonsColorsState.brightness, shape = CircleShape)
+                        .border(1.dp, buttonColorState.brightness, shape = CircleShape)
                 ) {
                     Icon(
                         painter = painterResource(
@@ -128,11 +128,11 @@ fun ColorPickerDemo(
                 IconButton(
                     onClick = {
                         slotVisibleState = slotVisible.copy(colorPicker = true)
-                        buttonsColorsState = buttonsColors.copy(colorPicker = Color.Red)
+                        buttonColorState = buttonColor.copy(colorPicker = Color.Red)
                     },
                     modifier = Modifier
                         .size(50.dp)
-                        .border(1.dp, buttonsColorsState.colorPicker, shape = CircleShape)
+                        .border(1.dp, buttonColorState.colorPicker, shape = CircleShape)
                 ) {
                     Icon(
                         painter = painterResource(
@@ -149,12 +149,12 @@ fun ColorPickerDemo(
                 Button(
                     onClick = {
                         slotVisibleState = slotVisible.copy(temperature = true)
-                        buttonsColorsState = buttonsColors.copy(temperature = Color.Red)
+                        buttonColorState = buttonColor.copy(temperature = Color.Red)
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = selectedColor),
                     modifier = Modifier
                         .size(50.dp)
-                        .border(1.dp, buttonsColorsState.temperature, shape = CircleShape)
+                        .border(1.dp, buttonColorState.temperature, shape = CircleShape)
                 ) {
                 }
             }
