@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -12,7 +13,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -60,12 +64,20 @@ fun ColorPickerDemo(
     var buttonColorState by remember { mutableStateOf(buttonColor) }
     var slotVisibleState by remember { mutableStateOf(slotVisible) }
 
+    val brush = Brush.verticalGradient(
+        colors = listOf(
+            Color.White,
+            selectedColor
+        )
+    )
+
     buttonColorState = buttonColor.copy(colorPicker = Color.Red)
     slotVisibleState = slotVisible.copy(colorPicker = true)
 
     ColorPickerTheme {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
+                .background(selectedColor),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -146,20 +158,74 @@ fun ColorPickerDemo(
 
                 Spacer(modifier = Modifier.width(5.dp))
 
-                Button(
+                GradientButton(
+                    text = "",
+                    textColor = Color.Unspecified,
+                    size = 50.dp,
+                    borderColor = buttonColorState.temperature,
+                    borderWidth = 1.dp,
+                    gradient = brush,
                     onClick = {
                         slotVisibleState = slotVisible.copy(temperature = true)
                         buttonColorState = buttonColor.copy(temperature = Color.Red)
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = selectedColor),
-                    modifier = Modifier
-                        .size(50.dp)
-                        .border(1.dp, buttonColorState.temperature, shape = CircleShape)
-                ) {
-                }
+                    }
+                )
             }
         }
     }
+}
+
+@Composable
+fun GradientButton(
+    text: String,
+    textColor: Color,
+    size: Dp,
+    borderColor: Color,
+    borderWidth: Dp,
+    gradient: Brush,
+    onClick: () -> Unit,
+) {
+    Button(
+        modifier = Modifier
+            .size(size)
+            .border(borderWidth, borderColor, shape = CircleShape),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent
+        ),
+        contentPadding = PaddingValues(),
+        onClick = { onClick() })
+    {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(shape = CircleShape)
+                .background(gradient)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = text, color = textColor)
+        }
+    }
+}
+
+@Preview
+@Composable
+fun GradientButtonPreview() {
+    val brush = Brush.verticalGradient(
+        colors = listOf(
+            Color.Blue,
+            Color.Green
+        )
+    )
+    GradientButton(
+        text = "",
+        textColor = Color.Unspecified,
+        size = 50.dp,
+        borderColor = Color.Red,
+        borderWidth = 1.dp,
+        gradient = brush,
+        onClick = {}
+    )
 }
 
 @Preview(showBackground = true)
